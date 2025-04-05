@@ -1,20 +1,21 @@
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import { PropsWithChildren } from "react";
+import { PrivyProvider } from '@privy-io/react-auth';
+import { celoAlfajores } from 'viem/chains';
 
-import { Network } from '@aptos-labs/ts-sdk';
-
-export const WalletProvider = ({ children }: PropsWithChildren) => {
-
+export default function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
-    <AptosWalletAdapterProvider
-      optInWallets={["Petra", "Continue with Google", "Mizu Wallet", "T wallet", "Pontem Wallet", "Nightly"]}
-      autoConnect={true}
-      dappConfig={{ network: Network.DEVNET }}
-      onError={(error) => {
-        console.log("error", error);
+    <PrivyProvider
+      appId={import.meta.env.VITE_PRIVY_APP_ID}
+      clientId={import.meta.env.VITE_CLIENT_ID}
+      config={{
+        supportedChains: [celoAlfajores],
+        appearance: {
+          theme: 'light',
+          accentColor: '#676FFF',
+          logo: 'https://your-logo-url'
+        }
       }}
     >
       {children}
-    </AptosWalletAdapterProvider>
+    </PrivyProvider>
   );
-};
+}

@@ -1,16 +1,12 @@
 import { v4 as uuid4 } from "uuid"
-import { useWallet } from '@aptos-labs/wallet-adapter-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 
-
-import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
 import { login } from "@/apis/auth";
 import { useToast } from "@/hooks/toast";
 import { useAtom } from "jotai";
 import { authTokenAtom } from "@/atoms/global.atom";
-
+import { usePrivy } from "@privy-io/react-auth";
 
 
 const Navbar = () => {
@@ -19,43 +15,47 @@ const Navbar = () => {
 
   const [, setToken] = useAtom(authTokenAtom);
 
-  const { connected, signMessage, account } = useWallet();
+  const { ready, authenticated, login, logout, user, connectWallet } = usePrivy();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  const handleSignMessage = async () => {
-    if (connected) {
-      const signature = await signMessage({
-        message: import.meta.env.VITE_SIGNATURE_MESSAGE,
-        nonce: uuid4().toString()
-
-      });
-      const { message, statusCode } = await login(account?.address.toString()!, account?.publicKey.toString()!, signature.fullMessage, signature.signature.toString());
-
-      if (statusCode === 200) {
-        setToken(message);
-        toast({
-          type: "success",
-          message: "Logged in successfully",
-          duration: 3000
-        });
-      } else {
-        toast({
-          type: "danger",
-          message: message,
-          duration: 3000
-        });
-      }
-
-    }
-  }
-
   useEffect(() => {
-    console.log(connected);
-    handleSignMessage();
-  }, [connected])
+    console.log("authenticated", authenticated);
+  }, [authenticated]);
+
+  // const handleSignMessage = async () => {
+  //   if (connected) {
+  //     const signature = await signMessage({
+  //       message: import.meta.env.VITE_SIGNATURE_MESSAGE,
+  //       nonce: uuid4().toString()
+
+  //     });
+  //     const { message, statusCode } = await login(account?.address.toString()!, account?.publicKey.toString()!, signature.fullMessage, signature.signature.toString());
+
+  //     if (statusCode === 200) {
+  //       setToken(message);
+  //       toast({
+  //         type: "success",
+  //         message: "Logged in successfully",
+  //         duration: 3000
+  //       });
+  //     } else {
+  //       toast({
+  //         type: "danger",
+  //         message: message,
+  //         duration: 3000
+  //       });
+  //     }
+
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   console.log(connected);
+  //   handleSignMessage();
+  // }, [connected])
 
   return (
     <div className="fixed left-0 top-0 right-0 bottom-auto bg-transparent z-[9999]">
@@ -114,21 +114,35 @@ const Navbar = () => {
               <div className="h-14 w-[1px] bg-white/20"></div>
               <nav className="flex items-center px-3">
                 <Link to="/explore" className="px-4 py-2 text-white text-base hover:text-yellow">Explore</Link>
-                {connected && (
+                {authenticated && (
                   <>
                     <Link to="/list-token" className="px-4 py-2 text-white text-base hover:text-yellow">List Token</Link>
                     <Link to="/dashboard" className="px-4 py-2 text-white text-base hover:text-yellow">Dashboard</Link>
                     <Link to="/create-character" className="px-4 py-2 text-white text-base hover:text-yellow">Create Character</Link>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm font-mono">
+                        {user?.wallet?.address?.slice(0, 6)}...{user?.wallet?.address?.slice(-4)}
+                      </span>
+                      <button
+                        onClick={logout}
+                        className="px-3 py-1 bg-red-500 text-white rounded-md text-sm"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
                   </>
                 )}
 
-                <WalletSelector />
-                {/* <button
-                  onClick={() => connect("Petra")}
-                  className="rounded-lg bg-[#ff3979] hover:bg-[#5100ff] transition-colors duration-200 py-2 px-4 text-white border-none cursor-pointer ml-3 text-base"
-                >
-                  {connected ? truncateAddress(account?.address.toString()!) : 'Connect Wallet'}
-                </button> */}
+                {!authenticated && (
+                  <button
+                    onClick={login}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md"
+                  >
+                    Connect Wallet
+                  </button>
+                )}
+
+
               </nav>
             </div>
           </div>
@@ -146,7 +160,7 @@ const Navbar = () => {
                 >
                   Explore
                 </Link>
-                {connected && (
+                {authenticated && (
                   <>
                     <Link
                       to="/list-token"
@@ -169,19 +183,20 @@ const Navbar = () => {
                     >
                       Create Character
                     </Link>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm font-mono">
+                        {user?.wallet?.address?.slice(0, 6)}...{user?.wallet?.address?.slice(-4)}
+                      </span>
+                      <button
+                        onClick={logout}
+                        className="px-3 py-1 bg-red-500 text-white rounded-md text-sm"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
                   </>
                 )}
 
-                <WalletSelector />
-                {/* <button
-                  onClick={() => {
-                    connect("Petra");
-                    toggleMenu();
-                  }}
-                  className="w-full rounded-lg bg-[#ff3979] hover:bg-[#5100ff] transition-colors duration-200 py-3 text-white text-lg font-medium border-none cursor-pointer mt-6"
-                >
-                  {connected ? truncateAddress(account?.address.toString()!) : 'Connect Wallet'}
-                </button> */}
               </div>
             </div>
           </div>
@@ -192,8 +207,3 @@ const Navbar = () => {
 }
 
 export default Navbar
-
-// npm install @aptos-labs/wallet-adapter-react @aptos-labs/wallet-adapter-ant-design
-// npm install @aptos-labs/wallet-adapter-core
-// npm install @martianwallet/aptos-wallet-adapter @pontem/wallet-adapter-plugin
-// npm install @rise-wallet/wallet-adapter @nightlywallet/aptos-wallet-adapter

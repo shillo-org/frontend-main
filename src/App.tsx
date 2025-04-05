@@ -9,7 +9,7 @@ import {
   DashboardPage,
   LiveStreamPage,
 } from "./pages";
-import { WalletProvider } from "./WalletProvider";
+import WalletProvider from "./WalletProvider";
 import { ToastProvider } from "./hooks/toast";
 import { Provider as JotaiProvider } from "jotai";
 
