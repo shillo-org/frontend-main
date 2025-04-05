@@ -503,7 +503,7 @@ const LiveStreamPage = () => {
                   YouTube
                 </a>
               )}
-              <a href={`https://explorer.aptoslabs.com/account/${tokenInfo?.contractAddress}`} target="_blank" rel="noopener noreferrer" className="bg-[#3498db] text-white px-4 py-2 rounded-md no-underline text-sm font-medium hover:opacity-90 transition-opacity duration-200">
+              <a href={`https://explorer.cello.com/account/${tokenInfo?.contractAddress}`} target="_blank" rel="noopener noreferrer" className="bg-[#3498db] text-white px-4 py-2 rounded-md no-underline text-sm font-medium hover:opacity-90 transition-opacity duration-200">
                 Contract
               </a>
             </div>
